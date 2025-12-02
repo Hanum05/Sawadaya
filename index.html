@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAWADAYA Smart Irigasi Dashboard</title>
+    <!-- Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Memuat Tone.js untuk menghasilkan suara dering peringatan -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Gray 100 */
+        }
+        .card-metric {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .card-metric:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .detail-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+        .detail-content.active {
+            max-height: 200px; /* Cukup besar untuk menampung konten */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        /* Style untuk Peringatan Dering (Simulasi Efek Berkedip/Pulsing) */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .ringing-alert {
+            animation: pulse-ring 1s infinite;
+        }
+        .forecast-card {
+            transition: transform 0.3s ease;
+        }
+        .forecast-card:hover {
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Header Dashboard -->
+    <header class="text-center mb-10 p-6 md:p-8 rounded-2xl bg-gradient-to-r from-green-700 to-blue-600 text-white shadow-xl">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+            Dashboard Monitoring SAWADAYA
+        </h1>
+        <p class="mt-1 text-lg font-medium text-green-200">
+            Pemantauan Real-Time dan Dampak Keberlanjutan
+        </p>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        
+        <!-- NEW SECTION: Introduction SAWADAYA -->
+        <section class="mb-8 p-6 bg-white rounded-xl shadow-lg border-l-8 border-green-600">
+            <h2 class="text-2xl font-bold text-green-700 mb-3 flex items-center">
+                <span class="text-3xl mr-3">🧑‍🌾</span> Tahukah Kamu Apa Itu SAWADAYA?
+            </h2>
+            <p class="text-gray-700">
+                SAWADAYA (Sawah Mandiri Daya) adalah sistem irigasi cerdas berbasis **Internet of Things (IoT)** yang dirancang khusus untuk pertanian padi. Tujuannya adalah mengoptimalkan penggunaan air menggunakan metode **Alternate Wetting and Drying (AWD)**, mengurangi beban kerja petani, sekaligus memitigasi emisi gas rumah kaca.
+            </p>
+        </section>
+
+        
+        <!-- Tab Navigation -->
+        <div class="mb-6 flex space-x-4 border-b border-gray-300 overflow-x-auto pb-1">
+            <button id="tab-metrics" class="py-2 px-4 text-sm md:text-base font-semibold border-b-2 border-green-600 text-green-600 hover:text-green-800 transition duration-150 whitespace-nowrap">
+                Metrik Utama & Dampak
+            </button>
+            <button id="tab-status" class="py-2 px-4 text-sm md:text-base font-semibold border-b-2 border-transparent text-gray-500 hover:text-green-600 transition duration-150 whitespace-nowrap">
+                Status Sistem
+            </button>
+            <button id="tab-forecast" class="py-2 px-4 text-sm md:text-base font-semibold border-b-2 border-transparent text-gray-500 hover:text-green-600 transition duration-150 whitespace-nowrap">
+                Ramalan & Otomasi AWD
+            </button>
+            <button id="tab-weather" class="py-2 px-4 text-sm md:text-base font-semibold border-b-2 border-transparent text-gray-500 hover:text-green-600 transition duration-150 whitespace-nowrap">
+                Prakiraan Cuaca Lokal
+            </button>
+        </div>
+
+        <!-- Content 1: Metrics and Impact (Komponen) -->
+        <section id="content-metrics" class="tab-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Metrik Kinerja & Dampak Positif</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+                <!-- Metrik 1: Pengurangan Beban Kerja -->
+                <div class="bg-white rounded-xl shadow-lg border-l-4 border-red-500 p-5 card-metric" data-target="detail-workload">
+                    <p class="text-sm font-medium text-red-500">Beban Kerja Petani</p>
+                    <p class="text-4xl font-extrabold text-red-700 mt-1">80% ↓</p>
+                    <p class="text-sm text-gray-500 mt-2">Klik untuk Detail Lebih Lanjut</p>
+                    <div id="detail-workload" class="detail-content mt-3 border-t border-gray-200">
+                        <p class="text-xs text-gray-600">Otomatisasi irigasi menghilangkan kebutuhan pengawasan dan pengaturan air harian, memungkinkan petani fokus pada kegiatan pertanian lain yang lebih strategis.</p>
+                    </div>
+                </div>
+
+                <!-- Metrik 2: Konservasi Air -->
+                <div class="bg-white rounded-xl shadow-lg border-l-4 border-blue-500 p-5 card-metric" data-target="detail-water">
+                    <p class="text-sm font-medium text-blue-500">Konservasi Air</p>
+                    <p class="text-4xl font-extrabold text-blue-700 mt-1">30% ↓</p>
+                    <p class="text-sm text-gray-500 mt-2">Klik untuk Detail Lebih Lanjut</p>
+                    <div id="detail-water" class="detail-content mt-3 border-t border-gray-200">
+                        <p class="text-xs text-gray-600">Penghematan air yang signifikan berkat implementasi teknologi Alternate Wetting and Drying (AWD) yang cerdas dan presisi.</p>
+                    </div>
+                </div>
+
+                <!-- Metrik 3: Peningkatan Hasil Panen -->
+                <div class="bg-white rounded-xl shadow-lg border-l-4 border-yellow-500 p-5 card-metric" data-target="detail-yield">
+                    <p class="text-sm font-medium text-yellow-500">Peningkatan Hasil Panen</p>
+                    <p class="text-4xl font-extrabold text-yellow-700 mt-1">15% ↑</p>
+                    <p class="text-sm text-gray-500 mt-2">Klik untuk Detail Lebih Lanjut</p>
+                    <div id="detail-yield" class="detail-content mt-3 border-t border-gray-200">
+                        <p class="text-xs text-gray-600">Penyediaan kondisi air yang optimal (tidak terlalu kering/basah) sesuai kebutuhan tanaman, yang mendukung pertumbuhan maksimal.</p>
+                    </div>
+                </div>
+
+                <!-- Metrik 4: Mitigasi Metana -->
+                <div class="bg-white rounded-xl shadow-lg border-l-4 border-green-500 p-5 card-metric" data-target="detail-methane">
+                    <p class="text-sm font-medium text-green-500">Mitigasi Emisi Metana</p>
+                    <p class="text-4xl font-extrabold text-green-700 mt-1">48% ↓</p>
+                    <p class="text-sm text-gray-500 mt-2">Klik untuk Detail Lebih Lanjut</p>
+                    <div id="detail-methane" class="detail-content mt-3 border-t border-gray-200">
+                        <p class="text-xs text-gray-600">Teknik AWD yang mengeringkan sawah secara berkala menghambat produksi gas Metana, kontributor utama perubahan iklim.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BAGIAN KOMPONEN ALAT SAWADAYA -->
+            <div class="mt-12 p-8 bg-gray-100 rounded-xl shadow-inner">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2 flex items-center">
+                    <span class="text-3xl mr-3 text-indigo-600">⚙️</span> Alat & Komponen Fisik Sistem SAWADAYA
+                </h3>
+                
+                <p class="text-gray-700 mb-6">
+                    Berikut adalah alat-alat utama yang diperlukan untuk membangun dan menjalankan sistem irigasi cerdas di lapangan:
+                </p>
+
+                <div class="space-y-6">
+                    
+                    <!-- Kategori 1: Sensing -->
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
+                        <h4 class="text-xl font-bold text-blue-700 mb-3">1. Unit Pengambilan Data (Sensing)</h4>
+                        <ul class="space-y-4 text-gray-600">
+                            <li class="flex items-start justify-between">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Sensor Kelembaban Tanah:</strong> Mengukur kadar air tanah secara presisi. Dasar utama penentuan irigasi AWD.
+                                </span>
+                                <img src="https://placehold.co/100x60/4c78a8/ffffff?text=SENSOR+TANAH" alt="Sensor Kelembaban Tanah" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                            <li class="flex items-start justify-between pt-2 border-t border-gray-100">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Kamera IoT:</strong> Menyediakan umpan balik visual *live* ke dashboard HP/Laptop dan dapat digunakan untuk analisis kondisi tanaman.
+                                </span>
+                                <img src="https://placehold.co/100x60/843c96/ffffff?text=KAMERA+IoT" alt="Kamera IoT Pertanian" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                            <li class="flex items-start justify-between pt-2 border-t border-gray-100">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Sensor Ketinggian Air:</strong> Memonitor ketinggian air di sawah atau saluran, sebagai pelengkap data kelembaban.
+                                </span>
+                                <img src="https://placehold.co/100x60/29a3a3/ffffff?text=SENSOR+AIR" alt="Sensor Ketinggian Air Irigasi" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Kategori 2: Kontrol & Aktuasi -->
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-red-500">
+                        <h4 class="text-xl font-bold text-red-700 mb-3">2. Unit Kontrol dan Otomasi (Processing & Actuating)</h4>
+                        <ul class="space-y-4 text-gray-600">
+                            <li class="flex items-start justify-between">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Mikrokontroler Cerdas (ESP32/Arduino):</strong> "Otak" sistem yang memproses data sensor dan mengirim perintah buka/tutup katup.
+                                </span>
+                                <img src="https://placehold.co/100x60/e8743b/ffffff?text=ESP32/OTAK" alt="Mikrokontroler ESP32" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                            <li class="flex items-start justify-between pt-2 border-t border-gray-100">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Katup Solenoid Otomatis:</strong> Aktuator fisik yang membuka dan menutup aliran air ke sawah berdasarkan perintah.
+                                </span>
+                                <img src="https://placehold.co/100x60/c44e4e/ffffff?text=KATUP+SOLENOID" alt="Katup Solenoid Irigasi Otomatis" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                            <li class="flex items-start justify-between pt-2 border-t border-gray-100">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Driver Relai:</strong> Perangkat perantara untuk mengendalikan Katup Solenoid yang berdaya tinggi dengan aman.
+                                </span>
+                                <img src="https://placehold.co/100x60/775d9e/ffffff?text=MODUL+RELAY" alt="Driver Relai Modul 4 Channel" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Kategori 3: Daya & Konektivitas -->
+                    <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                        <h4 class="text-xl font-bold text-green-700 mb-3">3. Unit Daya, Komunikasi, dan Peringatan</h4>
+                        <ul class="space-y-4 text-gray-600">
+                            <li class="flex items-start justify-between">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Panel Surya & Baterai:</strong> Menyediakan sumber daya listrik mandiri dan berkelanjutan di lokasi terpencil.
+                                </span>
+                                <img src="https://placehold.co/100x60/6a994e/ffffff?text=PANEL+SURYA" alt="Panel Surya dan Baterai IoT" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                            <li class="flex items-start justify-between pt-2 border-t border-gray-100">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Modul Komunikasi (GSM/Wi-Fi):</strong> Memastikan data terkirim ke *cloud* dan sistem dapat menerima perintah dari HP/Laptop petani.
+                                </span>
+                                <img src="https://placehold.co/100x60/1e4c78/ffffff?text=MODUL+KOMUNIKASI" alt="Modul GSM untuk IoT" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                            <li class="flex items-start justify-between pt-2 border-t border-gray-100">
+                                <span class="flex-1">
+                                    <strong class="text-gray-900">Speaker/Modul Dering Lapangan:</strong> Menghasilkan bunyi bel keras di lokasi sebagai peringatan darurat bagi petani terdekat (selain peringatan di platform).
+                                </span>
+                                <img src="https://placehold.co/100x60/d1ae45/ffffff?text=SPEAKER+LAPANGAN" alt="Speaker Dering Peringatan Lapangan" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Ringkasan Tambahan -->
+            <div class="mt-8 p-6 bg-white rounded-xl shadow-lg border-l-8 border-indigo-600">
+                <h3 class="text-xl font-bold text-indigo-700 mb-2">Ringkasan Keberlanjutan</h3>
+                <p class="text-gray-700">SAWADAYA bukan hanya sistem irigasi, tetapi solusi terintegrasi yang berfokus pada keseimbangan produktivitas ekonomi dan tanggung jawab lingkungan, didukung penuh oleh energi terbarukan (Panel Surya).</p>
+            </div>
+        </section>
+
+        <!-- Content 2: System Status (Simulation) -->
+        <section id="content-status" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Status Sistem Lapangan SAWADAYA (Simulasi Data & Aksi)</h2>
+
+            <!-- Grid Kontrol dan Status Utama -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- KARTU 1: Simulasi Umpan Kamera Langsung (Real-Time Look) -->
+                <div id="camera-status-card" class="bg-white p-6 rounded-xl shadow-lg lg:col-span-2 border-l-4 border-yellow-500">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-700">Umpan Kamera Lapangan (Simulasi Tampilan HP/Laptop)</h3>
+                        <span id="camera-detection-text" class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">STATUS: CUKUP AIR</span>
+                    </div>
+
+                    <div id="camera-feed-container" class="w-full h-64 bg-gray-200 rounded-lg overflow-hidden border-2 border-gray-300 relative">
+                        <!-- Placeholder Gambar/Video di sini. Di produksi diganti stream RTSP/WebRTC -->
+                        <img src="https://placehold.co/800x600/38761d/ffffff?text=Lahan+Air+Cukup" alt="Simulasi Lahan Cukup Air" class="w-full h-full object-cover rounded-lg">
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                            🔴 LIVE SIMULASI
+                        </div>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-500">Catatan: Di aplikasi nyata, gambar statis ini akan diganti dengan *video stream* langsung dari kamera IoT.</p>
+                </div>
+                
+                <!-- KARTU 2: Peringatan Dering & Status Katup (Kontrol Manual) -->
+                <div class="lg:col-span-1 flex flex-col space-y-6">
+                    
+                    <!-- Dering Peringatan -->
+                    <div id="alert-card" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-gray-300 flex-1">
+                        <p class="text-lg font-semibold text-gray-600 flex items-center mb-3">
+                            🔔 Dering Peringatan Irigasi
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span id="alert-text" class="text-4xl font-extrabold text-gray-400">NON-AKTIF</span>
+                            <span class="text-gray-400">
+                                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path></svg>
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Berbunyi jika Kekeringan terdeteksi **dan** Katup Tertutup.</p>
+                    </div>
+
+                    <!-- Katup & Kontrol Manual -->
+                    <div id="valve-status-card" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500 flex-1">
+                        <p class="text-lg font-semibold text-gray-600">Status Katup Irigasi IoT</p>
+                        <div class="mt-3 flex items-center justify-between">
+                            <span id="valve-status-text" class="text-3xl font-extrabold text-red-600">TERTUTUP (BERHENTI)</span>
+                            <span class="text-red-500">
+                                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-6V4H6v6H0l10 10 10-10zM12 4v6"></path></svg>
+                            </span>
+                        </div>
+                        <button id="toggle-valve-btn" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-150">
+                            TINDAKAN MANUAL: Buka Katup
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+             <!-- Simulasi & Unit Kontrol Lainnya -->
+            <div class="mt-8 p-6 bg-white rounded-xl shadow-lg flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-6">
+                
+                <!-- Unit Kontrol & Daya -->
+                <div class="w-full md:w-1/3 p-4 border-b md:border-b-0 md:border-r border-gray-200">
+                    <p class="text-lg font-semibold text-gray-600">Unit Kontrol: Status Koneksi & Daya</p>
+                    <div class="mt-3 flex items-center justify-between">
+                        <span class="text-3xl font-extrabold text-blue-600">ONLINE / 98%</span>
+                        <span class="text-blue-500">
+                            <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </span>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500">Koneksi IoT stabil dan daya surya terisi penuh.</p>
+                </div>
+
+                <!-- Kontrol Simulasi Kamera -->
+                <div class="w-full md:w-2/3 p-4">
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">Simulasi Kondisi Lahan (Ganti Tampilan Kamera)</h3>
+                    <button id="simulate-dry-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 mr-3">
+                        Simulasi: KEKERINGAN (Trigger Alert)
+                    </button>
+                    <button id="simulate-wet-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                        Simulasi: CUKUP AIR (Matikan Alert)
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Content 3: Weather Forecast & AWD Automation -->
+        <section id="content-forecast" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Ramalan Cuaca 3 Hari & Rekomendasi Otomasi AWD</h2>
+
+            <!-- Status Kelembaban Saat Ini -->
+            <div class="p-6 bg-white rounded-xl shadow-lg mb-6 border-l-4 border-pink-500">
+                <p class="text-lg font-semibold text-gray-700 mb-2">Data Sensor Kelembaban Tanah Saat Ini:</p>
+                <div class="flex items-center space-x-4">
+                    <span id="current-moisture" class="text-4xl font-extrabold text-pink-700">55%</span>
+                    <span id="moisture-status" class="text-xl font-semibold text-pink-500">(Optimal: Siap Pengeringan)</span>
+                </div>
+            </div>
+
+            <!-- Simulasi Ramalan Cuaca -->
+            <h3 class="text-xl font-bold text-gray-700 mb-4">Simulasi Ramalan Cuaca 3 Hari Ke Depan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                
+                <!-- Hari 1 -->
+                <div class="forecast-card bg-white p-5 rounded-xl shadow-md text-center border-b-4 border-blue-400">
+                    <p class="font-bold text-gray-600">HARI INI</p>
+                    <div class="text-5xl my-2" id="forecast-icon-1">☁️</div>
+                    <p class="text-lg font-semibold text-gray-800" id="forecast-desc-1">Berawan Ringan</p>
+                </div>
+
+                <!-- Hari 2 -->
+                <div class="forecast-card bg-white p-5 rounded-xl shadow-md text-center border-b-4 border-yellow-400">
+                    <p class="font-bold text-gray-600">BESOK</p>
+                    <div class="text-5xl my-2" id="forecast-icon-2">☀️</div>
+                    <p class="text-lg font-semibold text-gray-800" id="forecast-desc-2">Cerah Penuh</p>
+                </div>
+
+                <!-- Hari 3 -->
+                <div class="forecast-card bg-white p-5 rounded-xl shadow-md text-center border-b-4 border-green-400">
+                    <p class="font-bold text-gray-600">LUSA</p>
+                    <div class="text-5xl my-2" id="forecast-icon-3">🌧️</div>
+                    <p class="text-lg font-semibold text-gray-800" id="forecast-desc-3">Hujan Lebat (10mm+)</p>
+                </div>
+            </div>
+
+            <!-- Rekomendasi Otomasi (Hasil Logika Cerdas AWD) -->
+            <div class="p-6 rounded-xl shadow-2xl bg-gradient-to-r from-green-500 to-teal-600 text-white">
+                <h3 class="text-2xl font-extrabold mb-3 flex items-center">
+                    <span class="text-3xl mr-3">🧠</span> Rekomendasi Otomasi SAWADAYA
+                </h3>
+                <p class="text-sm font-light mb-4">Analisis berdasar Kelembaban Tanah & Ramalan Cuaca 3 Hari</p>
+                
+                <div id="auto-recommendation" class="text-3xl font-extrabold bg-white text-teal-700 p-4 rounded-lg text-center shadow-lg">
+                    Rekomendasi Cerdas akan muncul di sini...
+                </div>
+                
+                <p id="recommendation-justification" class="mt-4 text-sm font-medium text-green-100">
+                    Penjelasan logikanya akan disajikan di sini.
+                </p>
+
+                <div class="mt-6 text-center">
+                    <button id="change-forecast-btn" class="bg-teal-800 hover:bg-teal-900 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150">
+                        Ubah Simulasi Ramalan Cuaca
+                    </button>
+                </div>
+            </div>
+            
+        </section>
+
+        <!-- Content 4: Local Weather Forecast (Malang) -->
+        <section id="content-weather" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Prakiraan Cuaca Lokal Malang</h2>
+            
+            <div class="max-w-md mx-auto p-6 bg-gray-800 rounded-3xl shadow-2xl text-white">
+                <!-- Header Lokasi dan Tanggal -->
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-extrabold text-blue-300">Malang</h1>
+                    <p id="weather-current-date" class="text-sm text-gray-400 mt-1"></p>
+                </div>
+
+                <!-- Cuaca Hari Ini (Sangat Besar) -->
+                <div class="text-center mb-8 p-4 bg-gray-700 rounded-2xl shadow-xl border border-gray-600">
+                    <div id="weather-current-icon" class="text-8xl mb-2"></div>
+                    <p id="weather-current-temp" class="text-7xl font-light text-white leading-none">--°</p>
+                    <p id="weather-current-condition" class="text-2xl font-semibold text-green-300 mt-2">Memuat...</p>
+                    <p id="weather-current-high-low" class="text-sm text-gray-300 mt-2">Suhu Tertinggi/Terendah: --° / --°</p>
+                </div>
+
+                <!-- Prakiraan 5 Hari -->
+                <h3 class="text-lg font-semibold mb-4 text-white border-b border-gray-600 pb-2">Prakiraan 5 Hari Ke Depan</h3>
+                <div id="weather-forecast-container" class="space-y-3">
+                    <!-- Data akan diisi oleh JavaScript -->
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <script>
+        // GLOBAL STATE SIMULATION
+        let isValveOpen = false;
+        let needsIrrigation = false; // Berdasarkan deteksi kamera/sensor
+        let moistureLevel = 55; // Simulasi persentase kelembaban tanah
+        let currentForecastScenario = 0; // Index scenario 0: Dry, 1: Wet, 2: Optimal
+        
+        // --- WEATHER CONSTANTS & FUNCTIONS (Untuk Prakiraan Cuaca Lokal) ---
+        const DAYS_ID_WEATHER = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const MONTHS_ID_WEATHER = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        const WEATHER_OPTIONS_MALANG = [
+            // Suhu disesuaikan untuk Malang (lebih dingin)
+            { condition: 'Cerah', icon: '☀️', minTemp: 24, maxTemp: 29 }, 
+            { condition: 'Berawan', icon: '🌤️', minTemp: 22, maxTemp: 27 },
+            { condition: 'Hujan Ringan', icon: '🌧️', minTemp: 19, maxTemp: 24 },
+            { condition: 'Badai Petir', icon: '⛈️', minTemp: 18, maxTemp: 22 },
+            { condition: 'Berkabut', icon: '🌫️', minTemp: 17, maxTemp: 21 },
+        ];
+
+        function formatDateIDWeather(date) {
+            const dayName = DAYS_ID_WEATHER[date.getDay()];
+            const dayOfMonth = date.getDate();
+            const monthName = MONTHS_ID_WEATHER[date.getMonth()];
+            const year = date.getFullYear();
+            return `${dayName}, ${dayOfMonth} ${monthName} ${year}`;
+        }
+
+        function getSimulatedWeatherMalang(dayIndex) {
+            // Menggunakan tanggal untuk seed agar hasilnya konsisten per hari
+            const today = new Date();
+            const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + (today.getDate() + dayIndex);
+
+            // Simple pseudo-random index based on seed
+            const optionIndex = seed % WEATHER_OPTIONS_MALANG.length;
+            const weather = WEATHER_OPTIONS_MALANG[optionIndex];
+
+            // Generator angka acak yang deterministik
+            const rand = (n) => (Math.sin(n) * 10000) % 1;
+            
+            const min = weather.minTemp;
+            const max = weather.maxTemp;
+            
+            const high = Math.floor(min + rand(seed * 0.1) * (max - min + 1));
+            const low = high - Math.floor(rand(seed * 0.2) * 5) - 2; 
+
+            // Memastikan batasan suhu
+            const actualHigh = Math.max(min, high);
+            const actualLow = Math.max(min - 3, low);
+
+            return {
+                icon: weather.icon,
+                condition: weather.condition,
+                high: actualHigh,
+                low: actualLow,
+                current: Math.floor((actualHigh + actualLow) / 2)
+            };
+        }
+
+        function renderMalangWeather() {
+            const today = new Date();
+            const forecastContainer = document.getElementById('weather-forecast-container');
+            forecastContainer.innerHTML = ''; // Clear old content
+
+            // 1. Display Current Date
+            document.getElementById('weather-current-date').textContent = formatDateIDWeather(today);
+
+            // 2. Get and Display Today's Weather
+            const todayWeather = getSimulatedWeatherMalang(0);
+            document.getElementById('weather-current-temp').textContent = `${todayWeather.current}°`;
+            document.getElementById('weather-current-condition').textContent = todayWeather.condition;
+            document.getElementById('weather-current-icon').textContent = todayWeather.icon;
+            document.getElementById('weather-current-high-low').textContent = `Suhu Tertinggi/Terendah: ${todayWeather.high}° / ${todayWeather.low}°`;
+
+
+            // 3. Create 5-Day Forecast
+            for (let i = 0; i < 5; i++) {
+                const forecastDate = new Date();
+                forecastDate.setDate(today.getDate() + i);
+                const forecastData = getSimulatedWeatherMalang(i);
+
+                let dayLabel;
+                if (i === 0) {
+                    dayLabel = 'Hari Ini';
+                } else if (i === 1) {
+                    dayLabel = 'Besok';
+                } else {
+                    dayLabel = DAYS_ID_WEATHER[forecastDate.getDay()];
+                }
+
+                const forecastItem = document.createElement('div');
+                forecastItem.className = 'flex items-center justify-between p-3 bg-gray-700 rounded-xl shadow-md transition duration-300 hover:bg-gray-600/70';
+                forecastItem.innerHTML = `
+                    <!-- Hari dan Tanggal -->
+                    <div class="flex-1 min-w-[100px]">
+                        <p class="font-bold text-base text-white">${dayLabel}</p>
+                        <p class="text-xs text-gray-400">${forecastDate.getDate()} ${MONTHS_ID_WEATHER[forecastDate.getMonth()]}</p>
+                    </div>
+
+                    <!-- Ikon dan Kondisi -->
+                    <div class="flex items-center space-x-2 flex-1 justify-center">
+                        <span class="text-2xl">${forecastData.icon}</span>
+                        <span class="text-sm font-medium hidden sm:inline text-blue-200">${forecastData.condition}</span>
+                    </div>
+
+                    <!-- Suhu Tinggi/Rendah -->
+                    <div class="flex-1 text-right">
+                        <span class="text-lg font-bold text-white">${forecastData.high}°</span>
+                        <span class="text-gray-400 ml-2">${forecastData.low}°</span>
+                    </div>
+                `;
+                forecastContainer.appendChild(forecastItem);
+            }
+        }
+        
+        // --- DATA SIMULASI UTK AWD OTOMATIS (TAB 3) ---
+        const weatherScenarios = [
+            // Scenario 0: Dry Outlook (Irigasi DIBUTUHKAN)
+            {
+                forecast: [
+                    { day: "HARI INI", icon: "☀️", desc: "Cerah Penuh" },
+                    { day: "BESOK", icon: "🌤️", desc: "Cerah Berawan" },
+                    { day: "LUSA", icon: "🌥️", desc: "Berawan Tebal" },
+                ],
+                moisture: 30 // Simulasi kondisi kering
+            },
+            // Scenario 1: Rain Outlook (Irigasi DITUNDA)
+            {
+                forecast: [
+                    { day: "HARI INI", icon: "☁️", desc: "Berawan Ringan" },
+                    { day: "BESOK", icon: "🌧️", desc: "Hujan Ringan" },
+                    { day: "LUSA", icon: "⛈️", desc: "Badai Petir & Hujan Lebat" },
+                ],
+                moisture: 30 // Simulasi kondisi kering
+            },
+            // Scenario 2: Optimal (Air Cukup)
+            {
+                forecast: [
+                    { day: "HARI INI", icon: "☀️", desc: "Cerah Penuh" },
+                    { day: "BESOK", icon: "🌤️", desc: "Cerah Berawan" },
+                    { day: "LUSA", icon: "🌥️", desc: "Berawan Tebal" },
+                ],
+                moisture: 75 // Simulasi kondisi optimal
+            }
+        ];
+
+        // --- KONFIGURASI AUDIO (MENGGUNAKAN TONE.JS) ---
+        const synth = new Tone.MembraneSynth({
+            "envelope": { "attack": 0.001, "decay": 0.4, "sustain": 0.01, "release": 0.4, "attackCurve": "exponential" },
+            "octaves": 10,
+            "pitchDecay": 0.1
+        }).toDestination();
+        
+        let alertInterval = null;
+
+        function startAlertSound() {
+            Tone.start().then(() => {
+                if (!alertInterval) {
+                    alertInterval = setInterval(() => {
+                        synth.triggerAttackRelease("C3", "8n"); 
+                    }, 1500);
+                }
+            });
+        }
+
+        function stopAlertSound() {
+            if (alertInterval) {
+                clearInterval(alertInterval);
+                alertInterval = null;
+            }
+        }
+        
+        // --- UI TOGGLING FUNCTIONS (TAB 1) ---
+
+        function toggleDetail(targetId) {
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                document.querySelectorAll('.detail-content.active').forEach(detail => {
+                    if (detail.id !== targetId) {
+                        detail.classList.remove('active');
+                    }
+                });
+                targetElement.classList.toggle('active');
+            }
+        }
+
+        // Fungsi utama untuk memperbarui UI Status Sistem (Tab 2)
+        function updateSystemStatusUI() {
+            const valveText = document.getElementById('valve-status-text');
+            const valveCard = document.getElementById('valve-status-card');
+            const toggleButton = document.getElementById('toggle-valve-btn');
+            const alertCard = document.getElementById('alert-card');
+            const alertText = document.getElementById('alert-text');
+            const cameraText = document.getElementById('camera-detection-text');
+            const cameraCard = document.getElementById('camera-status-card');
+            const cameraFeedContainer = document.getElementById('camera-feed-container');
+            
+            // Tentukan status irigasi berdasarkan moisture level
+            needsIrrigation = moistureLevel < 40; 
+            
+            const dryImageUrl = "https://placehold.co/800x600/e03131/ffffff?text=Lahan+Kering+Krisisl+IRIGASI+DIBUTUHKAN";
+            const wetImageUrl = "https://placehold.co/800x600/38761d/ffffff?text=Lahan+Air+Cukup";
+
+            // 1. Update Valve Status UI
+            if (isValveOpen) {
+                valveText.textContent = "TERBUKA (MENGALIR)";
+                valveText.classList.remove('text-red-600');
+                valveText.classList.add('text-green-600');
+                valveCard.classList.remove('border-red-500');
+                valveCard.classList.add('border-green-500');
+                toggleButton.textContent = "TINDAKAN MANUAL: Tutup Katup";
+            } else {
+                valveText.textContent = "TERTUTUP (BERHENTI)";
+                valveText.classList.remove('text-green-600');
+                valveText.classList.add('text-red-600');
+                valveCard.classList.remove('border-green-500');
+                valveCard.classList.add('border-red-500');
+                toggleButton.textContent = "TINDAKAN MANUAL: Buka Katup";
+            }
+
+            // 2. Update Camera Detection UI & Feed Visual
+            if (needsIrrigation) {
+                cameraText.textContent = "STATUS: KEKERINGAN";
+                cameraText.classList.remove('bg-green-100', 'text-green-800');
+                cameraText.classList.add('bg-red-100', 'text-red-800');
+                cameraCard.classList.remove('border-yellow-500');
+                cameraCard.classList.add('border-red-500');
+                cameraFeedContainer.innerHTML = `<img src="${dryImageUrl}" alt="Simulasi Lahan Kering" class="w-full h-full object-cover rounded-lg"><div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">🔴 LIVE SIMULASI</div>`;
+            } else {
+                cameraText.textContent = "STATUS: CUKUP AIR";
+                cameraText.classList.remove('bg-red-100', 'text-red-800');
+                cameraText.classList.add('bg-green-100', 'text-green-800');
+                cameraCard.classList.remove('border-red-500');
+                cameraCard.classList.add('border-yellow-500');
+                cameraFeedContainer.innerHTML = `<img src="${wetImageUrl}" alt="Simulasi Lahan Cukup Air" class="w-full h-full object-cover rounded-lg"><div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">🔴 LIVE SIMULASI</div>`;
+            }
+
+            // 3. Update Alert/Ringing Reminder UI & Sound Control
+            const isAlertActive = needsIrrigation && !isValveOpen;
+            if (isAlertActive) {
+                alertText.textContent = "AKTIF!";
+                alertText.classList.remove('text-gray-400');
+                alertText.classList.add('text-red-600');
+                alertCard.classList.add('ringing-alert', 'border-red-600');
+                alertCard.classList.remove('border-gray-300');
+                
+                startAlertSound();
+            } else {
+                alertText.textContent = "NON-AKTIF";
+                alertText.classList.remove('text-red-600');
+                alertText.classList.add('text-gray-400');
+                alertCard.classList.remove('ringing-alert', 'border-red-600');
+                alertCard.classList.add('border-gray-300');
+                
+                stopAlertSound();
+            }
+        }
+
+        // Fungsi untuk memperbarui UI Ramalan & Otomasi (Tab 3)
+        function updateForecastUI() {
+            const scenario = weatherScenarios[currentForecastScenario];
+            const isDry = scenario.moisture < 40;
+            const isRainPredicted = scenario.forecast.some(f => f.desc.includes('Hujan') || f.desc.includes('Badai'));
+
+            // 1. Update Current Moisture Display
+            document.getElementById('current-moisture').textContent = `${scenario.moisture}%`;
+            if (isDry) {
+                document.getElementById('moisture-status').textContent = "(KRITIS: Perlu Irigasi)";
+                document.getElementById('moisture-status').classList.remove('text-pink-500');
+                document.getElementById('moisture-status').classList.add('text-red-500');
+            } else {
+                 document.getElementById('moisture-status').textContent = "(Optimal: Siap Pengeringan)";
+                 document.getElementById('moisture-status').classList.remove('text-red-500');
+                 document.getElementById('moisture-status').classList.add('text-pink-500');
+            }
+            
+            // 2. Update 3-Day Forecast Cards
+            scenario.forecast.forEach((f, index) => {
+                document.getElementById(`forecast-icon-${index + 1}`).textContent = f.icon;
+                document.getElementById(`forecast-desc-${index + 1}`).textContent = f.desc;
+            });
+
+            // 3. Determine and Update AWD Recommendation
+            const recommendationBox = document.getElementById('auto-recommendation');
+            const justificationText = document.getElementById('recommendation-justification');
+            
+            recommendationBox.classList.remove('text-green-700', 'text-red-700', 'text-blue-700');
+
+            if (!isDry) {
+                // Skenario 1: Air Cukup
+                recommendationBox.textContent = "TINDAKAN: PERTAHANKAN (Air Masih Cukup)";
+                recommendationBox.classList.add('text-green-700');
+                justificationText.textContent = "Kelembaban tanah masih di atas batas minimum (40%). Sistem menunggu sawah mengering (fase 'Drying' AWD) untuk menghemat air dan mengurangi Metana.";
+            } else if (isDry && isRainPredicted) {
+                // Skenario 2: Kering + Ramalan Hujan = Tunda Irigasi
+                recommendationBox.textContent = "TINDAKAN: TUNDA PEMBUKAAN KATUP 24 JAM";
+                recommendationBox.classList.add('text-blue-700');
+                justificationText.textContent = "Tanah kritis kering, namun hujan lebat diperkirakan turun dalam 48 jam ke depan. Untuk menghemat energi dan air, sistem menunda irigasi agar sawah diisi oleh air hujan.";
+            } else if (isDry && !isRainPredicted) {
+                // Skenario 3: Kering + Tidak Ada Hujan = Irigasi Sekarang
+                recommendationBox.textContent = "TINDAKAN: BUKA KATUP SEKARANG (Krisis Kekeringan)";
+                recommendationBox.classList.add('text-red-700');
+                justificationText.textContent = "Tanah kritis kering dan tidak ada ramalan hujan signifikan dalam 3 hari ke depan. Katup otomatis harus segera dibuka untuk menghindari kerusakan panen.";
+            }
+
+            // Update moisture level for status tab consistency
+            moistureLevel = scenario.moisture;
+        }
+
+        // --- EVENT HANDLERS ---
+        
+        // Handler untuk tombol Buka/Tutup Katup Manual
+        document.getElementById('toggle-valve-btn').addEventListener('click', () => {
+            isValveOpen = !isValveOpen;
+            updateSystemStatusUI();
+        });
+
+        // Handler untuk Simulasi Ramalan Cuaca
+        document.getElementById('change-forecast-btn').addEventListener('click', () => {
+            currentForecastScenario = (currentForecastScenario + 1) % weatherScenarios.length;
+            updateForecastUI();
+            updateSystemStatusUI(); // Sinkronisasi dengan tab status
+        });
+
+        // Handler untuk Simulasi Deteksi Kekeringan (Kamera di Tab Status)
+        document.getElementById('simulate-dry-btn').addEventListener('click', () => {
+            currentForecastScenario = 0;
+            updateForecastUI();
+            updateSystemStatusUI();
+        });
+
+        // Handler untuk Simulasi Deteksi Cukup Air (Kamera di Tab Status)
+        document.getElementById('simulate-wet-btn').addEventListener('click', () => {
+            currentForecastScenario = 2;
+            updateForecastUI();
+            updateSystemStatusUI();
+        });
+
+
+        // --- INITIALIZATION & TAB SWITCHING ---
+
+        // Menambahkan event listener ke semua kartu metrik (Metrics Tab)
+        document.querySelectorAll('.card-metric').forEach(card => {
+            card.addEventListener('click', () => {
+                const targetId = card.getAttribute('data-target');
+                toggleDetail(targetId);
+            });
+        });
+
+        // Logika Tab Switching
+        const tabMetrics = document.getElementById('tab-metrics');
+        const tabStatus = document.getElementById('tab-status');
+        const tabForecast = document.getElementById('tab-forecast');
+        const tabWeather = document.getElementById('tab-weather'); // NEW
+        
+        const contentMetrics = document.getElementById('content-metrics');
+        const contentStatus = document.getElementById('content-status');
+        const contentForecast = document.getElementById('content-forecast');
+        const contentWeather = document.getElementById('content-weather'); // NEW
+
+        function switchTab(activeTab, activeContent) {
+            // Update Tab Styles
+            const allTabs = [tabMetrics, tabStatus, tabForecast, tabWeather];
+            allTabs.forEach(tab => {
+                if (tab === activeTab) {
+                    tab.classList.add('border-green-600', 'text-green-600');
+                    tab.classList.remove('border-transparent', 'text-gray-500');
+                } else {
+                    tab.classList.remove('border-green-600', 'text-green-600');
+                    tab.classList.add('border-transparent', 'text-gray-500');
+                }
+            });
+
+            // Update Content Visibility
+            const allContents = [contentMetrics, contentStatus, contentForecast, contentWeather];
+            allContents.forEach(content => {
+                if (content === activeContent) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+
+            // Pastikan UI status, forecast, dan weather diperbarui saat tab dilihat
+            if (activeContent === contentStatus) {
+                updateSystemStatusUI();
+            } else if (activeContent === contentForecast) {
+                updateForecastUI();
+            } else if (activeContent === contentWeather) { 
+                renderMalangWeather(); // Call the specific weather rendering function
+            }
+        }
+
+        tabMetrics.addEventListener('click', () => {
+            switchTab(tabMetrics, contentMetrics);
+        });
+
+        tabStatus.addEventListener('click', () => {
+            switchTab(tabStatus, contentStatus);
+        });
+        
+        tabForecast.addEventListener('click', () => {
+            switchTab(tabForecast, contentForecast);
+        });
+
+        tabWeather.addEventListener('click', () => {
+            switchTab(tabWeather, contentWeather);
+        });
+        
+        // Initial setup
+        // Mulai dengan Skenario 2 (Optimal) untuk menghindari alarm berbunyi saat pertama kali dimuat
+        currentForecastScenario = 2; 
+        updateForecastUI(); 
+        updateSystemStatusUI(); 
+
+        // Untuk memastikan Tab Metrics yang pertama kali aktif
+        switchTab(tabMetrics, contentMetrics);
+        
+    </script>
+
+</body>
+</html>
