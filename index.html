@@ -51,14 +51,28 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- Header Dashboard -->
+    <!-- Header Dashboard dengan Logo "gile" -->
     <header class="text-center mb-10 p-6 md:p-8 rounded-2xl bg-gradient-to-r from-green-700 to-blue-600 text-white shadow-xl">
-        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-            Dashboard Monitoring SAWADAYA
-        </h1>
-        <p class="mt-1 text-lg font-medium text-green-200">
-            Pemantauan Real-Time dan Dampak Keberlanjutan
-        </p>
+        <!-- Flex container untuk menempatkan Logo dan Teks sejajar di tengah -->
+        <div class="flex items-center justify-center space-x-4">
+            <!-- Logo 1:1 Square (64x64) Placeholder -->
+            <img 
+                src="https://placehold.co/64x64/0e7490/ffffff?text=gile" 
+                alt="Logo Gile" 
+                class="w-16 h-16 rounded-xl shadow-lg border-2 border-white flex-shrink-0"
+                onerror="this.onerror=null; this.src='https://placehold.co/64x64/0e7490/ffffff?text=gile';"
+            >
+            
+            <!-- Judul dan Subjudul -->
+            <div>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                    Dashboard Monitoring SAWADAYA
+                </h1>
+                <p class="mt-1 text-lg font-medium text-green-200">
+                    Pemantauan Real-Time dan Dampak Keberlanjutan
+                </p>
+            </div>
+        </div>
     </header>
 
     <main class="max-w-7xl mx-auto">
@@ -834,3 +848,4 @@
 
 </body>
 </html>
+
