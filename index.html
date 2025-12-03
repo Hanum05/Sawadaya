@@ -51,28 +51,25 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- Header Dashboard dengan Logo "gile" -->
+    <!-- Header Dashboard -->
     <header class="text-center mb-10 p-6 md:p-8 rounded-2xl bg-gradient-to-r from-green-700 to-blue-600 text-white shadow-xl">
-        <!-- Flex container untuk menempatkan Logo dan Teks sejajar di tengah -->
-        <div class="flex items-center justify-center space-x-4">
-            <!-- Logo 1:1 Square (64x64) Placeholder -->
+        <div class="flex items-center justify-center">
+            <!-- LOGO SAWADAYA DITAMBAHKAN DI SINI -->
             <img 
-                src="https://placehold.co/64x64/0e7490/ffffff?text=gile" 
-                alt="Logo Gile" 
-                class="w-16 h-16 rounded-xl shadow-lg border-2 border-white flex-shrink-0"
-                onerror="this.onerror=null; this.src='https://placehold.co/64x64/0e7490/ffffff?text=gile';"
+                src="logo.png" 
+                alt="Logo SAWADAYA" 
+                class="w-12 h-12 mr-4 rounded-lg object-contain bg-white p-1"
+                onerror="this.onerror=null; this.src='https://placehold.co/48x48/ffffff/000000?text=LOGO';"
             >
-            
-            <!-- Judul dan Subjudul -->
-            <div>
-                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
-                    Dashboard Monitoring SAWADAYA
-                </h1>
-                <p class="mt-1 text-lg font-medium text-green-200">
-                    Pemantauan Real-Time dan Dampak Keberlanjutan
-                </p>
-            </div>
+            <!-- Akhir LOGO -->
+
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                Dashboard Monitoring SAWADAYA
+            </h1>
         </div>
+        <p class="mt-1 text-lg font-medium text-green-200">
+            Pemantauan Real-Time dan Dampak Keberlanjutan
+        </p>
     </header>
 
     <main class="max-w-7xl mx-auto">
@@ -641,7 +638,7 @@
                 valveText.textContent = "TERTUTUP (BERHENTI)";
                 valveText.classList.remove('text-green-600');
                 valveText.classList.add('text-red-600');
-                valveCard.classList.remove('border-green-500');
+                valveCard.classList.remove('border-green-600'); // Perubahan di sini agar konsisten
                 valveCard.classList.add('border-red-500');
                 toggleButton.textContent = "TINDAKAN MANUAL: Buka Katup";
             }
@@ -848,4 +845,3 @@
 
 </body>
 </html>
-
