@@ -69,7 +69,7 @@
                 <span class="text-3xl mr-3">🧑‍🌾</span> Tahukah Kamu Apa Itu SAWADAYA?
             </h2>
             <p class="text-gray-700">
-                SAWADAYA (Sawah Mandiri Daya) adalah sistem irigasi cerdas berbasis **Internet of Things (IoT)** yang dirancang khusus untuk pertanian padi. Tujuannya adalah mengoptimalkan penggunaan air menggunakan metode **Alternate Wetting and Drying (AWD)**, mengurangi beban kerja petani, sekaligus memitigasi emisi gas rumah kaca.
+                SAWADAYA (Sawah Mandiri Daya) adalah sistem irigasi cerdas berbasis <strong class="font-extrabold">Internet of Things (IoT)</strong> yang dirancang khusus untuk pertanian padi. Tujuannya adalah mengoptimalkan penggunaan air menggunakan metode <strong class="font-extrabold">Alternate Wetting and Drying (AWD)</strong>, mengurangi beban kerja petani, sekaligus memitigasi emisi gas rumah kaca.
             </p>
         </section>
 
@@ -162,7 +162,7 @@
                             </li>
                             <li class="flex items-start justify-between pt-2 border-t border-gray-100">
                                 <span class="flex-1">
-                                    <strong class="text-gray-900">Kamera IoT:</strong> Menyediakan umpan balik visual *live* ke dashboard HP/Laptop dan dapat digunakan untuk analisis kondisi tanaman.
+                                    <strong class="text-gray-900">Kamera IoT:</strong> Menyediakan umpan balik visual live ke dashboard HP/Laptop dan dapat digunakan untuk analisis kondisi tanaman.
                                 </span>
                                 <img src="https://placehold.co/100x60/843c96/ffffff?text=KAMERA+IoT" alt="Kamera IoT Pertanian" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
                             </li>
@@ -212,7 +212,7 @@
                             </li>
                             <li class="flex items-start justify-between pt-2 border-t border-gray-100">
                                 <span class="flex-1">
-                                    <strong class="text-gray-900">Modul Komunikasi (GSM/Wi-Fi):</strong> Memastikan data terkirim ke *cloud* dan sistem dapat menerima perintah dari HP/Laptop petani.
+                                    <strong class="text-gray-900">Modul Komunikasi (GSM/Wi-Fi):</strong> Memastikan data terkirim ke cloud dan sistem dapat menerima perintah dari HP/Laptop petani.
                                 </span>
                                 <img src="https://placehold.co/100x60/1e4c78/ffffff?text=MODUL+KOMUNIKASI" alt="Modul GSM untuk IoT" class="ml-4 w-24 h-12 rounded-lg object-cover shadow-md">
                             </li>
@@ -256,7 +256,7 @@
                             🔴 LIVE SIMULASI
                         </div>
                     </div>
-                    <p class="mt-3 text-sm text-gray-500">Catatan: Di aplikasi nyata, gambar statis ini akan diganti dengan *video stream* langsung dari kamera IoT.</p>
+                    <p class="mt-3 text-sm text-gray-500">Catatan: Di aplikasi nyata, gambar statis ini akan diganti dengan video stream langsung dari kamera IoT.</p>
                 </div>
                 
                 <!-- KARTU 2: Peringatan Dering & Status Katup (Kontrol Manual) -->
@@ -273,7 +273,7 @@
                                 <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path></svg>
                             </span>
                         </div>
-                        <p class="text-sm text-gray-500 mt-2">Berbunyi jika Kekeringan terdeteksi **dan** Katup Tertutup.</p>
+                        <p class="text-sm text-gray-500 mt-2">Berbunyi jika Kekeringan terdeteksi dan Katup Tertutup.</p>
                     </div>
 
                     <!-- Katup & Kontrol Manual -->
@@ -490,15 +490,13 @@
 
 
             // 3. Create 5-Day Forecast
-            for (let i = 0; i < 5; i++) {
+            for (let i = 1; i < 5; i++) {
                 const forecastDate = new Date();
                 forecastDate.setDate(today.getDate() + i);
                 const forecastData = getSimulatedWeatherMalang(i);
 
                 let dayLabel;
-                if (i === 0) {
-                    dayLabel = 'Hari Ini';
-                } else if (i === 1) {
+                if (i === 1) {
                     dayLabel = 'Besok';
                 } else {
                     dayLabel = DAYS_ID_WEATHER[forecastDate.getDay()];
